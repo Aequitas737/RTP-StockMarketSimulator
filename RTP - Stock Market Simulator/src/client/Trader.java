@@ -8,9 +8,9 @@ import java.util.*;
 import server.Stock;
 
 public abstract class Trader {
-	protected int balance;
-	protected LinkedList<Stock> portfolio;
-	protected LinkedList<String> ownedStock; //used for quick finding stocks bought by name
+	protected static int balance;
+	protected static LinkedList<Stock> portfolio;
+	protected static LinkedList<String> ownedStock; //used for quick finding stocks bought by name
 	
 	public abstract void buyStock(Stock stockToBuy);
 	
@@ -24,6 +24,8 @@ public abstract class Trader {
 	
 	public static void main(String[] args) throws Exception
 	{	
+		FileWriter fw;
+		BufferedWriter bw;
 		try {
 			//Set up connection to Stock Market
 			DatagramSocket socket = new DatagramSocket(4003);
@@ -47,7 +49,8 @@ public abstract class Trader {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 try
                 {
-                    receiverSocket.receive(receivePacket);
+                    DatagramSocket receiverSocket;
+					receiverSocket.receive(receivePacket);
                 }
                 catch (IOException e)
                 {
