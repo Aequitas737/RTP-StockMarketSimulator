@@ -69,6 +69,18 @@ public class TrendingAI implements Trader
 		return result; //if empty don't buy
 	}
 
+	private LinkedList<int> getStocksToSell(LinkedList<Stock> stockList)
+	{
+		LinkedList<int> result = new LinkedList<int>();
+		for (int i = 0; i < stockList.size(); i++)
+		{
+			if (stockList.get(i).getPrice() > stockAverage.get(i))
+			{
+				result.add(i);
+			}
+		}
+		return result; //if empty don't sell
+	}
 	
 	public void buyStock(LinkedList<Stock> stockList) throws Exception
 	{
@@ -111,14 +123,37 @@ public class TrendingAI implements Trader
 	}
 	
 	public void sellStock(Stock stockToBuy) throws Exception
-    {
-        if (sellAlgorithm(stockToBuy))
+    	{
+        	if (stockHistory.isEmpty())
 		{
-			
+			for (int i = 0; i < stockList.size(); ++i)
+			{
+				stockHistory.add(new LinkedList<double>());
+				//I saw this online
+				stockHistory.get(i).add(stockList[i].getPrice());
+			}
 		}
-		else
-		{
-			//update stocks
+		else {
+			//all queues are of the same size
+			if (!(stockHistory.get(0).size() < 6))
+			{
+				//dequeuing and calculating averages is done in buying
+				LinkedList stocksToSell = getStocksToSell(stockList);
+				if (!stocksToBuy.isEmpty())
+				{
+					//send request to buy from stock marketIPAdress
+					//right now assume just returning ints
+					//add to portfolio
+					for (int i = 0; i < stocksToBuy.size(); i++)
+					{
+						portfolio.remove(stockList.get(i));
+						ownedStock.remove(stockList.get(i).getName());
+						balance += stockList.get(i).getPrice();
+					}
+					//write to log
+				}
+			}
 		}
+	}
     
 }
