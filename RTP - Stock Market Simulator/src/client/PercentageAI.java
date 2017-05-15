@@ -56,6 +56,16 @@ public class PercentageAI implements Trader
 		return result; //if empty don't buy
 	}
 	
+	private LinkedList<int> getStocksToSell(LinkedList<Stock> stockList)
+	{
+		LinkedList<int> result = new LinkedList<int>();
+		for (int i = 0; i < stockList.size(); i++)
+		{
+			if ((stockList[i].getPrice() > initialStocks.getPrice() * 1.2) || (stockList[i].getPrice() > initialStocks.getPrice() * 0.9))
+				result.add(stockList[i]);
+		}
+		return result; //if empty don't sell
+	}
 	//original
 	/*
 	private LinkedList<Stock> getStocksToBuy(LinkedList<Stock> stockList)
@@ -107,14 +117,25 @@ public class PercentageAI implements Trader
 	
 	public void sellStock(Stock stockToBuy) throws Exception
     {
-        if (sellAlgorithm(stockToBuy))
+        if (initialStocks.isEmpty())
 		{
-			
+			initialStocks = stockList;
 		}
-		else
+        else
 		{
-			//update stocks
+			LinkedList stocksToSell = getStocksToSell(stockList);
+			if (!stocksToSell.isEmpty())
+			{
+				//send request to sell stocks to stock marketIPAdress
+				//right now assume just returning ints
+				//add to portfolio and update stock history for next decision
+				for (int i = 0; i < stocksToBuy.size(); i++)
+				{
+					initialStocks[i] = stockList[i];
+					portfolio.remove(stockList[i]);
+					ownedStock.remove(stockList[i].getName());
+					balance += stockList[i].getPrice();
+				}
+			}
 		}
-    
-	
 }
