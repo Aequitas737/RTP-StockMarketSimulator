@@ -12,6 +12,9 @@ public abstract class Trader {
 	protected static LinkedList<Stock> portfolio;
 	protected static LinkedList<String> ownedStock; //used for quick finding stocks bought by name
 	
+	protected static InetAddress marketIPAdress;
+	protected static DatagramSocket socket;
+	
 	public abstract void buyStock(Stock stockToBuy);
 	
 	public abstract void sellStock(Stock stockToBuy);
@@ -19,7 +22,7 @@ public abstract class Trader {
 	public static Stock deserialize(byte[] data) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream in = new ByteArrayInputStream(data);
 		ObjectInputStream is = new ObjectInputStream(in);
-		return (Stock) is.readObject();
+		return is.readObject();
 	}
 	
 	public void main(String[] args) throws Exception
@@ -28,8 +31,8 @@ public abstract class Trader {
 		BufferedWriter bw;
 		try {
 			//Set up connection to Stock Market
-			DatagramSocket socket = new DatagramSocket(4003);
-			InetAddress marketIPAdress = InetAddress.getByName("Herpderp"); //change IP address
+			socket = new DatagramSocket(4003);
+			marketIPAdress = InetAddress.getByName("Herpderp"); //change IP address
 			
 			//initialize class variables
 			balance = 0;
@@ -41,26 +44,27 @@ public abstract class Trader {
 			File traderLog = new File(logDir);
 			fw = new FileWriter(traderLog);
 			bw = new BufferedWriter(fw);
+			
+			//tell server (stock market) that trader has gone online
+			
+			
 			while (true)
 			{
 				byte[] receiveData = new byte[1024];
 				
 				// Recieve a packet
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-                DatagramSocket receiverSocket = new DatagramSocket();
                 try
                 {
-					receiverSocket.receive(receivePacket);
+                    DatagramSocket receiverSocket;
+					socket.receive(receivePacket);
                 }
                 catch (IOException e)
                 {
                     System.out.println(e.getMessage());
                 }
-                finally
-                {
-                	receiverSocket.close();
-                }
 				Stock newStock = deserialize(receivePacket.getData());
+				
 				//decide to either buy or sell stock, or update portfolio
 				if (ownedStock.contains(newStock.getName()))
 				{
@@ -85,7 +89,6 @@ public abstract class Trader {
 				ex.printStackTrace();
 
 			}
-
 		}
 	}
 }
