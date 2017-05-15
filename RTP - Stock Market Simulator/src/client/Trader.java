@@ -22,7 +22,7 @@ public abstract class Trader {
 		return is.readObject();
 	}
 	
-	public static void main(String[] args) throws Exception
+	public void main(String[] args) throws Exception
 	{	
 		FileWriter fw;
 		BufferedWriter bw;
