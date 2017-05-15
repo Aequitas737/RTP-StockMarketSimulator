@@ -7,12 +7,30 @@ public class StockMarket {
 	private static ArrayList<Stock> stockList = new ArrayList<Stock>();
 	private static double positiveBias = 0.51;//0-1, higher for more positive
 	private static double maxPercentageChange = 0.05;
+	private static long minimumTimeIntervalBetweenUpdates = ((long) 10000000000.);//nano seconds ie. 10 seconds
+	
 	public StockMarket(){
-		
+		Stock stock1 = new Stock("aaa", 10.0);
+		Stock stock2 = new Stock("bbb", 3.0);
+		Stock stock3 = new Stock("ccc", 0.001);
+		addStock(stock1);
+		addStock(stock2);
+		addStock(stock3);
 	}
 	
 	public static void main(String[] args){
+		long lastUpdateTime = System.nanoTime();
+		long currentTime = System.nanoTime();
 		
+		StockMarket stockMarket = new StockMarket();
+		
+		while(true){
+			currentTime = System.nanoTime();
+			if(currentTime - lastUpdateTime > minimumTimeIntervalBetweenUpdates){
+				lastUpdateTime = currentTime;
+				updateMarket();
+			}
+		}
 	}
 	
 	
