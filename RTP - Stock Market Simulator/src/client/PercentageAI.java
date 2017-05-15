@@ -106,11 +106,12 @@ public class PercentageAI implements Trader
 				//add to portfolio and update stock history for next decision
 				for (int i = 0; i < stocksToBuy.size(); i++)
 				{
-					initialStocks.get(i) = stockList.get(i);
 					portfolio.add(stockList.get(i));
 					ownedStock.add(stockList.get(i).getName());
 					balance -= stockList.get(i).getPrice();
 				}
+				for (int i = 0; i < stockList.size(); i++)
+					initialStocks.get(i) = stockList.get(i);
 				//write to log
 			}
 		}
