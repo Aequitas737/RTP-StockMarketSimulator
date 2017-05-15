@@ -15,9 +15,9 @@ public abstract class Trader {
 	protected static InetAddress marketIPAdress;
 	protected static DatagramSocket socket;
 	
-	public abstract void buyStock(Stock stockToBuy);
+	public abstract void buyStock(LinkedList<Stock> stockList);
 	
-	public abstract void sellStock(Stock stockToBuy);
+	public abstract void sellStock(LinkedList<Stock> stockList);
 	
 	public static Stock deserialize(byte[] data) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream in = new ByteArrayInputStream(data);
@@ -63,15 +63,10 @@ public abstract class Trader {
                 {
                     System.out.println(e.getMessage());
                 }
-				Stock newStock = deserialize(receivePacket.getData());
+				LinkedList<Stock> stockList = deserialize(receivePacket.getData());
 				
-				//decide to either buy or sell stock, or update portfolio
-				if (ownedStock.contains(newStock.getName()))
-				{
-					sellStock(newStock);
-				}
-				else
-					buyStock(newStock);
+				buyStock(stockList);
+				sellStock(stockList);
 					
 			}
 		} catch (IOException e) {
