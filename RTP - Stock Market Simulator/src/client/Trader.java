@@ -16,10 +16,10 @@ public abstract class Trader {
 	
 	public abstract void sellStock(Stock stockToBuy);
 	
-	public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
+	public static Stock deserialize(byte[] data) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream in = new ByteArrayInputStream(data);
 		ObjectInputStream is = new ObjectInputStream(in);
-		return is.readObject();
+		return (Stock) is.readObject();
 	}
 	
 	public void main(String[] args) throws Exception
@@ -47,17 +47,20 @@ public abstract class Trader {
 				
 				// Recieve a packet
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                DatagramSocket receiverSocket = new DatagramSocket();
                 try
                 {
-                    DatagramSocket receiverSocket;
 					receiverSocket.receive(receivePacket);
                 }
                 catch (IOException e)
                 {
                     System.out.println(e.getMessage());
                 }
+                finally
+                {
+                	receiverSocket.close();
+                }
 				Stock newStock = deserialize(receivePacket.getData());
-				
 				//decide to either buy or sell stock, or update portfolio
 				if (ownedStock.contains(newStock.getName()))
 				{
