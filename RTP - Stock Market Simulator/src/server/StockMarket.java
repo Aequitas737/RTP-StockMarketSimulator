@@ -1,10 +1,20 @@
 package server;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import client.Trader;
+
 public class StockMarket {
 	private static ArrayList<Stock> stockList = new ArrayList<Stock>();
+	
 	private static double positiveBias = 0.51;//0-1, higher for more positive
 	private static double maxPercentageChange = 0.05;
 	private static long minimumTimeIntervalBetweenUpdates = ((long) 10000000000.);//nano seconds ie. 10 seconds
@@ -18,17 +28,23 @@ public class StockMarket {
 		addStock(stock3);
 	}
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws SocketException{
+		int portNumber = 4003;
 		long lastUpdateTime = System.nanoTime();
 		long currentTime = System.nanoTime();
 		
 		StockMarket stockMarket = new StockMarket();
 		
+		//open connection to allow traders to connect
+		DatagramSocket socket = new DatagramSocket(portNumber);
+
 		while(true){
+			//read and handle messages from traders -> use separate threads?
 			currentTime = System.nanoTime();
 			if(currentTime - lastUpdateTime > minimumTimeIntervalBetweenUpdates){
 				lastUpdateTime = currentTime;
 				updateMarket();
+				notifyClientsOfPriceChange();
 			}
 		}
 	}
@@ -38,6 +54,11 @@ public class StockMarket {
 	
 	
 	
+	private static void notifyClientsOfPriceChange() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public static void addStock(Stock stock){
 		stockList.add(stock);
 	}

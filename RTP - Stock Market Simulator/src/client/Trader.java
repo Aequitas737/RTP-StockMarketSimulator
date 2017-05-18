@@ -32,7 +32,7 @@ public abstract class Trader {
 		try {
 			//Set up connection to Stock Market
 			socket = new DatagramSocket(4003);
-			marketIPAdress = InetAddress.getByName("Herpderp"); //change IP address
+			marketIPAdress = InetAddress.getByName("127.0.0.1"); //change IP address
 			
 			//initialize class variables
 			balance = 0;
