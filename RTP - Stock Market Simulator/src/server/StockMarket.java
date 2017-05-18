@@ -1,8 +1,10 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -28,8 +30,12 @@ public class StockMarket {
 		addStock(stock3);
 	}
 	
-	public static void main(String[] args) throws SocketException{
+	public static void main(String[] args) throws IOException{
+		//TODO handle exceptions with try catch don't just throw
 		int portNumber = 4003;
+		byte[] buffer = new byte[2048];
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+         
 		long lastUpdateTime = System.nanoTime();
 		long currentTime = System.nanoTime();
 		
@@ -40,6 +46,9 @@ public class StockMarket {
 
 		while(true){
 			//read and handle messages from traders -> use separate threads?
+			socket.receive(packet);
+			handlePacket(packet, buffer);
+			
 			currentTime = System.nanoTime();
 			if(currentTime - lastUpdateTime > minimumTimeIntervalBetweenUpdates){
 				lastUpdateTime = currentTime;
@@ -53,7 +62,20 @@ public class StockMarket {
 	
 	
 	
-	
+	/**
+	 * Handle a packet from a client,
+	 * we'll need to be able to do things like:
+	 * register - When a client comes online for the first time, they'll register with the server so the server knows where to send updates to.
+	 * buy -
+	 * sell
+	 * @param packet
+	 * @param buffer
+	 */
+	private static void handlePacket(DatagramPacket packet, byte[] buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private static void notifyClientsOfPriceChange() {
 		// TODO Auto-generated method stub
 		
