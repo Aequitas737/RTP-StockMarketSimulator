@@ -1,9 +1,19 @@
 package client;
 
-import java.io.*;
-import java.net.*;
-import java.nio.file.*;
-import java.util.*;
+import java.io.Serializable;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+
+import org.apache.commons.lang3.SerializationUtils;
 
 import server.Stock;
 
@@ -20,15 +30,18 @@ public abstract class Trader {
 	public abstract void sellStock(LinkedList<Stock> stockList);
 	
 	public static Stock deserialize(byte[] data) throws IOException, ClassNotFoundException {
-		ByteArrayInputStream in = new ByteArrayInputStream(data);
-		ObjectInputStream is = new ObjectInputStream(in);
-		return is.readObject();
+		
+		//ByteArrayInputStream in = new ByteArrayInputStream(data);
+		//ObjectInputStream is = new ObjectInputStream(in);
+		//return is.readObject();
+		Stock desStock = (Stock) SerializationUtils.deserialize(data);
+		return desStock;
 	}
 	
 	public void main(String[] args) throws Exception
 	{	
-		FileWriter fw;
-		BufferedWriter bw;
+		FileWriter fw = null;
+		BufferedWriter bw = null;
 		try {
 			//Set up connection to Stock Market
 			socket = new DatagramSocket(4003);
@@ -56,14 +69,16 @@ public abstract class Trader {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 try
                 {
-                    DatagramSocket receiverSocket;
+                    //DatagramSocket receiverSocket;
 					socket.receive(receivePacket);
                 }
                 catch (IOException e)
                 {
                     System.out.println(e.getMessage());
                 }
-				LinkedList<Stock> stockList = deserialize(receivePacket.getData());
+                
+				LinkedList<Stock> stockList = new LinkedList<Stock>();
+				stockList.add(deserialize(receivePacket.getData()));
 				
 				buyStock(stockList);
 				sellStock(stockList);

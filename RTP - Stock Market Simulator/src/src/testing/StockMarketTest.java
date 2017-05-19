@@ -1,4 +1,4 @@
-package testing;
+package src.testing;
 
 import static org.junit.Assert.*;
 
@@ -41,7 +41,7 @@ public class StockMarketTest {
 			}else{
 				timesNegative++;
 			}
-			market.getStockList().get(0).updatePrice(10.0);
+			StockMarket.getStockList().get(0).updatePrice(10.0);
 		}
 		System.out.println("times positive = " +timesPositive);
 		System.out.println("times negative = " + timesNegative);
