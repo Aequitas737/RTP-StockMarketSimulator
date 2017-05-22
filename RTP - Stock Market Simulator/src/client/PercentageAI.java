@@ -3,7 +3,9 @@ import java.net.*;
 import java.nio.file.*;
 import java.util.*;
 
-public class PercentageAI implements Trader
+import server.Stock;
+
+public class PercentageAI extends Trader
 {
 	private LinkedList<Stock> initialStocks = new LinkedList<Stock>();
 	
@@ -12,7 +14,7 @@ public class PercentageAI implements Trader
 		return initialPrice / finalPrice;
 	}
 	
-	private double calculateTotalPrice(LinkedList<int> indexList, LinkedList<Stock> stockList)
+	private double calculateTotalPrice(LinkedList<Integer> indexList, LinkedList<Stock> stockList)
 	{
 		double result = 0.0;
 		for (int i = 0; i < indexList.size(); i++)
@@ -22,14 +24,14 @@ public class PercentageAI implements Trader
 		return result;
 	}
 	
-	private LinkedList<int> getStocksToBuy(LinkedList<Stock> stockList)
+	private LinkedList<Integer> getStocksToBuy(LinkedList<Stock> stockList)
 	{
-		LinkedList<int> result = new LinkedList<int>();
-		LinkedList<double> percentages = new LinkedList<double>();
+		LinkedList<Integer> result = new LinkedList<Integer>();
+		LinkedList<Double> percentages = new LinkedList<Double>();
 		//sort which stocks are eligible
 		for (int i = 0; i < stockList.size(); i++)
 		{
-			if (stockList.get(i).getPrice() < initialStocks.getPrice() * 0.8) //change percentages here
+			if (stockList.get(i).getPrice() < initialStocks.get(i).getPrice() * 0.8) //change percentages here
 			{
 				result.add(i);
 				percentages.add(calculatePercentage(initialStocks.get(i).getPrice(), stockList.get(i).getPrice()));
@@ -39,10 +41,10 @@ public class PercentageAI implements Trader
 		if (balance < calculateTotalPrice(result, stockList))
 		{
 			//rearrange percentages to ascending order
-			LinkedList<double> sortedPercentages = percentages;
+			LinkedList<Double> sortedPercentages = percentages;
 			Collections.sort(sortedPercentages);
 			double copyBalance = balance;
-			LinkedList<int> copyResult = result;
+			LinkedList<Integer> copyResult = result;
 			for (int i = 0; i < sortedPercentages.size(); i++)
 			{
 				//Oh my goooooooood
@@ -56,12 +58,12 @@ public class PercentageAI implements Trader
 		return result; //if empty don't buy
 	}
 	
-	private LinkedList<int> getStocksToSell(LinkedList<Stock> stockList)
+	private LinkedList<Integer> getStocksToSell(LinkedList<Stock> stockList)
 	{
-		LinkedList<int> result = new LinkedList<int>();
+		LinkedList<Integer> result = new LinkedList<Integer>();
 		for (int i = 0; i < stockList.size(); i++)
 		{
-			if ((stockList.get(i).getPrice() > initialStocks.getPrice() * 1.2) || (stockList.get(i).getPrice() > initialStocks.getPrice() * 0.9))
+			if ((stockList.get(i).getPrice() > initialStocks.get(i).getPrice() * 1.2) || (stockList.get(i).getPrice() > initialStocks.get(i).getPrice() * 0.9))
 				result.add(stockList.get(i));
 		}
 		return result; //if empty don't sell
@@ -89,7 +91,7 @@ public class PercentageAI implements Trader
 		return result; //if empty don't sell
 	}
 	*/
-	public void buyStock(LinkedList<Stock> stockList) throws Exception
+	public void buyStock(Stock stockList)
     {
 		//check to see if initial stock list is empty before doing anything
 		if (initialStocks.isEmpty())
@@ -142,3 +144,28 @@ public class PercentageAI implements Trader
 			}
 		}
 }
+
+	@Override
+	public void buyStock(LinkedList<Stock> stockList) {
+		for(Stock stock : stockList)
+		{
+			buyStock(stock);
+		}
+		
+	}
+
+	@Override
+	public void sellStock(LinkedList<Stock> stockList) {
+		for(Stock stock : stockList)
+		{
+			sellStock(stock);
+		}
+		
+		
+	}
+
+	@Override
+	protected void analyzeMarketForDecision() {
+		// TODO Auto-generated method stub
+		
+	}

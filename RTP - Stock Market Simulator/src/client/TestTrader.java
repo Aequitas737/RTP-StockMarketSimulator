@@ -14,9 +14,7 @@ public class TestTrader extends Trader {
 	}
 
 	public static void main(String[] args) throws Exception{
-		System.out.println("asdf");
 		TestTrader trader = new TestTrader();
-		System.out.println("test trader launched");
 	}
 	
 	@Override

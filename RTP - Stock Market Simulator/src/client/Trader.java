@@ -57,7 +57,7 @@ public abstract class Trader {
             
             while (true){
             	analyzeMarketForDecision();
-            	printCurrentLocalStockPrices();
+            	displayInfo();
             	
             	fromServer = in.readLine();
             	String updatedPrices = fromServer;
@@ -65,6 +65,10 @@ public abstract class Trader {
             	updateLocalPrices(newPriceList);
             }
 	
+	}
+
+	private void displayInfo() {
+		printCurrentLocalStockPrices();		
 	}
 
 	/*
@@ -116,7 +120,10 @@ public abstract class Trader {
 		}
 		return stockList;
 	}
-
-	public abstract void main(String[] args) throws Exception;
+	
+	/**
+	 * Although Java does not allow static methods to be abstract, every subclass of Trader must implement the below entry point method:
+	 */
+	//public static abstract void main(String[] args) throws Exception;
 
 }
