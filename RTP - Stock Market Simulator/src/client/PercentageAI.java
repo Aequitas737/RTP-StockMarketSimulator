@@ -91,33 +91,33 @@ public class PercentageAI extends Trader
 		return result; //if empty don't sell
 	}
 	*/
-	public void buyStock(Stock stockList)
+	public void buyStock(Stock stockToBuy)
     {
 		//check to see if initial stock list is empty before doing anything
-		if (initialStocks.isEmpty())
+		/*if (initialStocks.isEmpty())
 		{
 			initialStocks = stockList;
 		}
         else
-		{
-			LinkedList stocksToBuy = getStocksToBuy(stockList);
-			if (!stocksToBuy.isEmpty())
-			{
+		{*/
+//			LinkedList stocksToBuy = getStocksToBuy(stockList);
+//			if (!stocksToBuy.isEmpty())
+//			{
 				//send request to buy from stock marketIPAdress
 				//right now assume just returning ints
 				//add to portfolio and update stock history for next decision
-				for (int i = 0; i < stocksToBuy.size(); i++)
-				{
-					portfolio.add(stockList.get(i));
-					ownedStock.add(stockList.get(i).getName());
-					balance -= stockList.get(i).getPrice();
-				}
-				for (int i = 0; i < stockList.size(); i++)
-					initialStocks.get(i) = stockList.get(i);
+//				for (int i = 0; i < stocksToBuy.size(); i++)
+//				{
+					portfolio.add(stockToBuy);
+					ownedStock.add(stockToBuy.getName());
+					balance -= stockToBuy.getPrice();
+//				}
+//				for (int i = 0; i < stockList.size(); i++)
+//					initialStocks.get(i) = stockList.get(i);
 				//write to log
-			}
-		}
     }
+
+ 
 	
 	public void sellStock(Stock stockToBuy) throws Exception
     {

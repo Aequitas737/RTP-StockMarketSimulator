@@ -13,7 +13,7 @@ public class TestTrader extends Trader {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) throws UnknownHostException, IOException{
 		TestTrader trader = new TestTrader();
 	}
 	
@@ -29,4 +29,9 @@ public class TestTrader extends Trader {
 
 	}
 
+	@Override
+	protected void analyzeMarketForDecision() {
+		// TODO Auto-generated method stub
+		
+	}
 }
