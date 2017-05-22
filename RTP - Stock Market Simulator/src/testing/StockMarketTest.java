@@ -1,4 +1,4 @@
-package src.testing;
+package testing;
 
 import static org.junit.Assert.*;
 
@@ -15,8 +15,8 @@ public class StockMarketTest {
 		double initialPrice = 10.00;
 		
 		Stock stock = new Stock("AWC", initialPrice);
-		market.addStock(stock);
-		assertEquals(initialPrice, market.getStockList().get(0).getPrice(), 0.00001);
+		StockMarket.addStock(stock);
+		assertEquals(initialPrice, StockMarket.getStockList().get(0).getPrice(), 0.00001);
 		
 	}
 	
@@ -28,14 +28,14 @@ public class StockMarketTest {
 		double initialPrice = 10.00;
 		
 		Stock stock = new Stock("AWC", initialPrice);
-		market.addStock(stock);
-		for(int i=0;i<10000;i++){
+		StockMarket.addStock(stock);
+		for(int i=0;i<1000;i++){
 			for(int j=0;j<1000;j++){
 				//System.out.println("\n\n");
-				market.updateMarket();
+				StockMarket.updateMarket();
 				//System.out.println(market.getStockList().get(0).getPrice());
 			}
-			double price = market.getStockList().get(0).getPrice();
+			double price = StockMarket.getStockList().get(0).getPrice();
 			if(price > 10.00){
 				timesPositive++;
 			}else{
