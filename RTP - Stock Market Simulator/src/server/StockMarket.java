@@ -1,7 +1,9 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,6 +13,7 @@ import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,11 +23,9 @@ import client.Trader;
 public class StockMarket {
 	private  ArrayList<Stock> stockList = new ArrayList<Stock>();
 	
-	private  ArrayList<ConnectionToClient> clientList;
-    private  LinkedBlockingQueue<Object> messages;
+	private ArrayList<Socket> clientSocketList = new ArrayList<Socket>();
     private  ServerSocket serverSocket;
-    
-    
+        
 	private  double positiveBias = 0.51;//0-1, higher for more positive
 	private  double maxPercentageChange = 0.05;
 	private  long minimumTimeIntervalBetweenUpdates = ((long) 10000000000.);//nano seconds ie. 10 seconds
@@ -40,114 +41,101 @@ public class StockMarket {
 		System.out.println("StockMarket Launched");
 		
 		int portNumber = 4003;
-		long lastUpdateTime = System.nanoTime();
-		long currentTime = System.nanoTime();
-		
-		clientList = new ArrayList<ConnectionToClient>();
-        messages = new LinkedBlockingQueue<Object>();
-        serverSocket = new ServerSocket(portNumber);
+		serverSocket = new ServerSocket(portNumber);
         
-        
-        Thread accept = new Thread() {
-            public void run(){
+        Thread updater = new Thread(){
+        	public void run(){
+        		long lastUpdateTime = System.nanoTime();
+        		long currentTime = System.nanoTime();
                 while(true){
-                    try{
-                        Socket s = serverSocket.accept();
-                        clientList.add(new ConnectionToClient(s));
-                        System.out.println("added client");
-                    }
-                    catch(IOException e){ e.printStackTrace(); }
+     			
+        			currentTime = System.nanoTime();
+        			if(currentTime - lastUpdateTime > minimumTimeIntervalBetweenUpdates){
+        				lastUpdateTime = currentTime;
+        				updateMarket();
+//        				System.out.println("updated market");
+        				notifyClientsOfPriceChange();
+        			}
                 }
-            }
+        	}
         };
-        
-        accept.setDaemon(true);
-        accept.start();
-                
-        Thread messageHandling = new Thread() {
-            public void run(){
-                while(true){
-                    try{
-                        Object message = messages.take();
-                        // Do some handling here...
-                        System.out.println("Message Received: " + message);
-                    }
-                    catch(InterruptedException e){ }
-                }
-            }
-        };
-        
-        messageHandling.setDaemon(true);
-        messageHandling.start();
-        
+        updater.start();
         
         while(true){
-			//read and handle messages from traders -> use separate threads?
-//			socket.receive(packet);
-//			handlePacket(packet, buffer);
-			
-			currentTime = System.nanoTime();
-			if(currentTime - lastUpdateTime > minimumTimeIntervalBetweenUpdates){
-				lastUpdateTime = currentTime;
-				updateMarket();
-				System.out.println("updated market");
-				notifyClientsOfPriceChange();
-			}
+        	System.out.println("waiting to accept");
+        	Socket socket = serverSocket.accept();
+        	System.out.println("accepted");
+        	clientSocketList.add(socket);
+        	
+        	Thread accepter = new Thread(){
+        		public void run(){
+        			DataOutputStream out = null;
+        			Socket sock = socket;
+        			try {
+        				out = new DataOutputStream(sock.getOutputStream());
+        		        } catch (IOException e) {
+        		            return;
+        		        }
+        		        String message = "";
+    		            try {
+    		            	//Send a message on accept to the client detailing the stock names and prices
+    		        		for(Stock stock : stockList){
+    		        			message += stock.getName() + "," + stock.getPrice() + ",";
+    		        		}
+    		        		//remove last comma
+    		        		message = message.substring(0,message.length()-1);
+    		        		//add a new line
+    		        		message += "\n";
+    		        		out.writeBytes(message);
+    		        		out.flush();
+    		            } catch (IOException e) {
+    		                e.printStackTrace();
+    		                return;
+    		            }
+        		}
+        	};
+        	accepter.start();
         }
 	}
 	
 	public static void main(String[] args) throws IOException{
-
-
 		StockMarket stockMarket = new StockMarket();
-		
-		//TODO handle exceptions with try catch don't just throw
-		
-        
-        
-//		byte[] buffer = new byte[2048];
-//        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-         
-		
-		
-		//open connection to allow traders to connect
-//		DatagramSocket socket = new DatagramSocket(portNumber);
-
-		
-	}
-	
-	
-	
-	
-	
-	/**
-	 * Handle a packet from a client,
-	 * we'll need to be able to do things like:
-	 * register - When a client comes online for the first time, they'll register with the server so the server knows where to send updates to.
-	 * buy -
-	 * sell
-	 * @param packet
-	 * @param buffer
-	 */
-	private static void handlePacket(DatagramPacket packet, byte[] buffer) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	/**
+	 * No need for stock names as prices are always in the same order
 	 * Format of (String) message:
-	 * "stockName1,priceInt,stockName2,priceInt2,stockName3,priceInt3,"
+	 * "priceDouble,priceDouble2,priceDouble3"
 	 */
 	private void notifyClientsOfPriceChange() {
 		String message = "";
 		for(Stock stock : stockList){
-			message += stock.getName() + "," + stock.getPrice() + ",";
+			message += stock.getPrice() + ",";
 		}
 		//remove last comma
 		message = message.substring(0,message.length()-1);
-		sendToAll(message);		
+		sendToAllClients(message);		
 	}
 
+    public void sendToAllClients(String message){
+        for(Socket clientSocket : clientSocketList)
+            write(message, clientSocket);
+    }
+    
+    public void write(String message, Socket socket){
+    	//messages need to end with a new line, so add it here
+    	message += "\n";
+    	
+    	DataOutputStream out;
+		try {
+			out = new DataOutputStream(socket.getOutputStream());
+			out.writeBytes(message);
+			out.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
 	public void addStock(Stock stock){
 		stockList.add(stock);
 	}
@@ -174,53 +162,6 @@ public class StockMarket {
 			double newPrice = currentPrice + priceChange;
 			
 			stock.updatePrice(newPrice);
-		}
-	}
-	
-    public void sendToOne(int index, Object message)throws IndexOutOfBoundsException {
-        clientList.get(index).write(message);
-    }
-
-    public void sendToAll(Object message){
-        for(ConnectionToClient client : clientList)
-            client.write(message);
-    }
-	
-    //can this be static???
-	private class ConnectionToClient {
-		ObjectInputStream in;
-		ObjectOutputStream out;
-		Socket socket;
-		
-		ConnectionToClient(Socket sock) throws IOException {
-			this.socket = sock;
-			System.out.println("1");
-			in = new ObjectInputStream(socket.getInputStream());
-			System.out.println("2");
-			out = new ObjectOutputStream(socket.getOutputStream());
-			
-			Thread read = new Thread(){
-				public void run(){
-					while(true){
-						try{
-							Object obj = in.readObject();
-							messages.put(obj);
-						}
-						catch(IOException | ClassNotFoundException | InterruptedException e){ 
-							e.printStackTrace(); 
-						}
-					}
-				}
-			};
-			
-			read.setDaemon(true); // terminate when main ends
-			read.start();
-		}
-		public void write(Object obj) {
-			try{
-				out.writeObject(obj);
-			}
-			catch(IOException e){ e.printStackTrace(); }
 		}
 	}
 }
