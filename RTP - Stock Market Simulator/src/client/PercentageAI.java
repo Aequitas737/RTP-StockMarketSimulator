@@ -8,10 +8,10 @@ import server.Stock;
 
 public class PercentageAI extends Trader
 {
-	private double buyPercentageThreshold =0.9;
-	private double sellGainPercentageThreshold = 1.1;
-	private double sellLossPercentageThreshold =0.9;
-	private double purchaseLimit = 1000.0;//dollars
+	private final double buyPercentageThreshold = 0.9;
+	private final double sellGainPercentageThreshold = 1.1;
+	private final double sellLossPercentageThreshold = 0.8;
+	private final double purchaseLimit = 1000.0;//dollars
 	
 	public PercentageAI(double startingMoney) throws UnknownHostException, IOException {
 		super(startingMoney);
@@ -132,10 +132,10 @@ public class PercentageAI extends Trader
 	@Override
 	protected void performTrading() 
 	{
-		this.buyPercentageThreshold = 0.9;
-		this.sellGainPercentageThreshold = 1.1;
-		this.sellLossPercentageThreshold = 0.8;
-		this.purchaseLimit = 1000.0;
+//		this.buyPercentageThreshold = 0.9;
+//		this.sellGainPercentageThreshold = 1.1;
+//		this.sellLossPercentageThreshold = 0.8;
+//		this.purchaseLimit = 1000.0;
 		
 		if(!marketStocks.isEmpty())
 		{

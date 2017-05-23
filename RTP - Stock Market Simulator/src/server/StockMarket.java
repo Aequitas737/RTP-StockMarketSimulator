@@ -26,9 +26,10 @@ public class StockMarket {
 	private ArrayList<Socket> clientSocketList = new ArrayList<Socket>();
     private  ServerSocket serverSocket;
         
-	private  double positiveBias = 0.45;//0-1, higher for more positive
+	private  double positiveBias = 0.51;//0-1, higher for more positive
 	private  double maxPercentageChange = 0.05;
-	private  long minimumTimeIntervalBetweenUpdates = ((long) 5000000000.);//nano seconds ie. 5 seconds
+//	private  long minimumTimeIntervalBetweenUpdates = ((long) 5000000000.);//nano seconds ie. 5 seconds
+	private  long minimumTimeIntervalBetweenUpdates = ((long) 100000000.);//nano seconds ie. .1 seconds
 	
 	public StockMarket() throws IOException{
 		Stock stock1 = new Stock("aaa", 10.0);
@@ -55,6 +56,7 @@ public class StockMarket {
         				updateMarket();
 //        				System.out.println("updated market");
         				notifyClientsOfPriceChange();
+        				printCurrentStockPrices();
         			}
                 }
         	}
@@ -96,6 +98,14 @@ public class StockMarket {
         	};
         	accepter.start();
         }
+	}
+	
+	private void printCurrentStockPrices() {
+		for(Stock stock : stockList)
+		{
+			System.out.println(stock.getName() + " - $" + stock.getPrice());
+		}
+		System.out.println("\n");
 	}
 	
 	public static void main(String[] args) throws IOException{
