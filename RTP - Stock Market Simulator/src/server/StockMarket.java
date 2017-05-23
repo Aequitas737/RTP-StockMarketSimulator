@@ -128,22 +128,31 @@ public class StockMarket {
 	}
 
     public void sendToAllClients(String message){
+    	ArrayList<Socket> socketsToRemove = new ArrayList<Socket>();
         for(Socket clientSocket : clientSocketList)
-            write(message, clientSocket);
+        {
+			try {
+				write(message, clientSocket);
+			} catch (SocketException e) {
+				socketsToRemove.add(clientSocket);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
+        for(Socket clientSocket : socketsToRemove)
+        {
+        	clientSocketList.remove(clientSocket);
+        }
     }
     
-    public void write(String message, Socket socket){
+    public void write(String message, Socket socket) throws IOException{
     	//messages need to end with a new line, so add it here
     	message += "\n";
     	
     	DataOutputStream out;
-		try {
-			out = new DataOutputStream(socket.getOutputStream());
-			out.writeBytes(message);
-			out.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		out = new DataOutputStream(socket.getOutputStream());
+		out.writeBytes(message);
+		out.flush();
     }
     
 	public void addStock(Stock stock){

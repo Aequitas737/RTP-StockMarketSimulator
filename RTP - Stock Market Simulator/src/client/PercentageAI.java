@@ -8,10 +8,10 @@ import server.Stock;
 
 public class PercentageAI extends Trader
 {
-	private final double buyPercentageThreshold = 0.9;
-	private final double sellGainPercentageThreshold = 1.1;
-	private final double sellLossPercentageThreshold = 0.8;
-	private final double purchaseLimit = 1000.0;//dollars
+	private double buyPercentageThreshold = 0.9;
+	private double sellGainPercentageThreshold = 1.2;
+	private double sellLossPercentageThreshold = 0.8;
+	private double purchaseLimit = 1000.0;//dollars
 	
 	public PercentageAI(double startingMoney) throws UnknownHostException, IOException {
 		super(startingMoney);
@@ -36,10 +36,7 @@ public class PercentageAI extends Trader
 		ArrayList<Double> percentages = new ArrayList<Double>();
 		for (int i = 0; i < stockList.size(); i++)
 		{
-			if (stockList.get(i).getPrice() < (initialStocks.get(i).getPrice() * buyPercentageThreshold))
-			{
-				percentages.add(calculatePercentage(initialStocks.get(i).getPrice(), stockList.get(i).getPrice()));
-			}
+			percentages.add(calculatePercentage(initialStocks.get(i).getPrice(), stockList.get(i).getPrice()));
 		}
 		return percentages;
 	}
@@ -97,7 +94,6 @@ public class PercentageAI extends Trader
 		double moneySpent = 0.0;
 		ArrayList<Double> percentages = new ArrayList<Double>();
 		percentages = calculatePercentages(stockList);
-		
 		for(int i = 0; i<stockList.size(); i++)
 		{
 			int indexOfNextLargestPercentage = percentages.indexOf(Collections.max(percentages));
@@ -132,10 +128,10 @@ public class PercentageAI extends Trader
 	@Override
 	protected void performTrading() 
 	{
-//		this.buyPercentageThreshold = 0.9;
-//		this.sellGainPercentageThreshold = 1.1;
-//		this.sellLossPercentageThreshold = 0.8;
-//		this.purchaseLimit = 1000.0;
+		this.buyPercentageThreshold = 0.9;
+		this.sellGainPercentageThreshold = 1.1;
+		this.sellLossPercentageThreshold = 0.8;
+		this.purchaseLimit = 1000.0;
 		
 		if(!marketStocks.isEmpty())
 		{

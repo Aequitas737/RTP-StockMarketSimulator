@@ -1,6 +1,7 @@
 package client;
 
 import java.io.Serializable;
+import java.io.Writer;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -22,6 +23,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import server.Stock;
 
@@ -31,6 +35,7 @@ public abstract class Trader {
 	protected ArrayList<Stock> portfolio = new ArrayList<Stock>();
 	protected ArrayList<Stock> marketStocks;
 	protected ArrayList<Stock> initialStocks = new ArrayList<Stock>();
+	protected Logger logger = Logger.getLogger("MyLog");  
 
 
 	protected LinkedList<String> ownedStock; //used for quick finding stocks bought by name
@@ -51,23 +56,29 @@ public abstract class Trader {
 		int portNumber = 4003;
 		String ipAddress = "127.0.0.1";
 		socket = new Socket(ipAddress, portNumber);
-
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            String fromServer;
-            fromServer = in.readLine();
-            String initialStocksAndPricesList = fromServer;
-            marketStocks = parseStocksAndPricesString(initialStocksAndPricesList);
-            initialStocks = parseStocksAndPricesString(initialStocksAndPricesList); 
-            while (true){
-            	performTrading();
-            	displayInfo();
-            	
-            	fromServer = in.readLine();
-            	String updatedPrices = fromServer;
-            	List<String> newPriceList = parsePricesString(updatedPrices);
-            	updateLocalPrices(newPriceList);
-            }
+		
+	    FileHandler fh;  
+	    fh = new FileHandler("trader.log"); 
+	    logger.addHandler(fh);
+	    SimpleFormatter formatter = new SimpleFormatter();  
+        fh.setFormatter(formatter);  
+        logger.info("Trader Initiated"); 
+	    
+        String fromServer;
+        fromServer = in.readLine();
+        String initialStocksAndPricesList = fromServer;
+        marketStocks = parseStocksAndPricesString(initialStocksAndPricesList);
+        initialStocks = parseStocksAndPricesString(initialStocksAndPricesList); 
+        while (true){
+        	performTrading();
+        	displayInfo();
+        	
+        	fromServer = in.readLine();
+        	String updatedPrices = fromServer;
+        	List<String> newPriceList = parsePricesString(updatedPrices);
+        	updateLocalPrices(newPriceList);
+        }
 	
 	}
 
@@ -175,13 +186,10 @@ public abstract class Trader {
 		balance -= stockToBuy.getPrice() * quantityToBuy;
 		int index = indexOfStockFromName(initialStocks, stockToBuy.getName());
 		initialStocks.get(index).updatePrice(stockToBuy.getPrice());
-//		}
-//		else
-//		{
-//			portfolio.get(portfolio.indexOf(stockToBuy)).setQuantity(ownedQuantity-quantityToBuy);
-//			balance += stockToBuy.getPrice() * (quantityToBuy);
-//		}
-		return stockToBuy.getPrice() * quantityToBuy;
+		
+		double moneySpent = stockToBuy.getPrice() * quantityToBuy;
+		logger.info(this.getClass().getName() + " has purchased " + quantityToBuy + " shares of " + stockToBuy.getName() + " at $"+stockToBuy.getPrice());  
+		return moneySpent;
     }
  
 	public int indexOfStockFromName(ArrayList<Stock> stockList, String stockName)
@@ -214,8 +222,11 @@ public abstract class Trader {
 			portfolio.get(portfolio.indexOf(stockToSell)).setQuantity(ownedQuantity-quantityToSell);
 			balance += stockToSell.getPrice() * (quantityToSell);
 		}
-		//return money made
-		return stockToSell.getPrice() * (quantityToSell);
+		
+		logger.info(this.getClass().getName() + " has purchased " + quantityToSell + " shares of " + stockToSell.getName() + " at $"+stockToSell.getPrice());  
+
+		double moneymade = stockToSell.getPrice() * quantityToSell;
+		return moneymade;
 	}
 	
 	/**

@@ -1,31 +1,42 @@
+package client;
+
 import java.io.*;
 import java.net.*;
-import java.nio.file.*;
 import java.util.*;
 
-public class TrendingAI implements Trader
+import server.Stock;
+
+public class TrendingAI extends Trader
 {
-	private LinkedList<LinkedList<double>> stockHistory = new LinkedList<LinkedList<double>>();
-	private LinkedList<double> stockAverages = new LinkedList<double>();
+	private double purchaseLimit;
+	private int historySize;
+	private ArrayList<ArrayList<Double>> stockHistory;
+	private ArrayList<Double> stockAverages;
+	private double buyPercentageThreshold;
+	private double sellPercentageThreshold;
 	
-	private double calculateTotalPrice(LinkedList<int> indexList, LinkedList<Stock> stockList)
-	{
-		double result = 0.0;
-		for (int i = 0; i < indexList.size(); i++)
-		{
-			result += stockList.get(indexList.get(i)).getPrice();
-		}
-		return result;
+	
+	public TrendingAI(double startingMoney) throws UnknownHostException, IOException {
+		super(startingMoney);
 	}
 	
-	private LinkedList<double> calculateAverages()
+	public TrendingAI() throws UnknownHostException, IOException {
+		super(10000.0);
+	}
+	
+	public static void main(String[] args) throws UnknownHostException, IOException{
+		TrendingAI trader = new TrendingAI();
+	}
+
+	private ArrayList<Double> calculateAverages()
 	{
-		LinkedList<double> result = new LinkedList<double>();
+		ArrayList<Double> result = new ArrayList<Double>();
 		for (int i = 0; i < stockHistory.size(); i++)
 		{
 			double average = 0.0;
-			for (int j = 0; j < stockHistory.get(i).size(); j++)
-			{
+			ArrayList<Double> stockMomentInHistory = stockHistory.get(i).size();
+			for (int j = 0; j < stockMomentInHistory.csize; j++)
+			{//TODO add each average
 				average += stockHistory.get(i).get(j);
 			}
 			average /= stockHistory.get(i).size();
@@ -34,126 +45,134 @@ public class TrendingAI implements Trader
 		return result;
 	}
 	
-	private LinkedList<int> getStocksToBuy(LinkedList<Stock> stockList)
+	private ArrayList<Double> calculateAveragePercentageDifference(ArrayList<Stock> stockList)
 	{
-		LinkedList<int> result = new LinkedList<int>();
-		LinkedList<double> profits = new LinkedList<double>();
+		ArrayList<Double> percentages = new ArrayList<Double>();
+		for (int i = 0; i < stockList.size(); i++)
+		{
+			percentages.add(stockAverages.get(i) / stockList.get(i).getPrice());
+		}
+		return percentages;
+	}
+	
+	@Override
+	public ArrayList<Stock> getStocksToBuy(ArrayList<Stock> stockList)
+	{
+		ArrayList<Stock> result = new ArrayList<Stock>();
 		//sort which stocks are eligible
 		for (int i = 0; i < stockList.size(); i++)
 		{
-			if (stockList.get(i).getPrice() < stockAverage.get(i))
+			if (stockList.get(i).getPrice() < (stockAverages.get(i) * buyPercentageThreshold))
 			{
-				result.add(i);
-				profits.add(stockAverage.get(i) - stockList.get(i).getPrice());
+				result.add(stockList.get(i));
 			}
-		}
-		//check to see if everything can be afforded
-		if (balance < calculateTotalPrice(result, stockList))
-		{
-			//rearrange profits to descending order
-			LinkedList<double> sortedProfits = profits;
-			Collections.sort(sortedProfits);
-			Collections.reverse(sortedProfits);
-			double copyBalance = balance;
-			LinkedList<int> copyResult = result;
-			for (int i = 0; i < sortedProfits.size(); i++)
-			{
-				//Oh my goooooooood
-				if (stockList.get(result.get(profits.indexOf(sortedProfits.get(i)))).getPrice() > copyBalance)
-					copyResult.remove(profits.indexOf(sortedProfits.get(i)));
-				else
-					copyBalance -= stockList.get(result.get(profits.indexOf(sortedProfits.get(i)))).getPrice();
-			}
-			result = copyResult;
 		}
 		return result; //if empty don't buy
 	}
 
-	private LinkedList<int> getStocksToSell(LinkedList<Stock> stockList)
+	@Override
+	public ArrayList<Stock> getStocksToSell(ArrayList<Stock> stockList)
 	{
-		LinkedList<int> result = new LinkedList<int>();
+		ArrayList<Stock> result = new ArrayList<Stock>();
 		for (int i = 0; i < stockList.size(); i++)
 		{
-			if (stockList.get(i).getPrice() > stockAverage.get(i))
+			if (stockList.get(i).getPrice() > (stockAverages.get(i) * sellPercentageThreshold))
 			{
-				result.add(i);
+				result.add(stockList.get(i));
 			}
 		}
 		return result; //if empty don't sell
 	}
 	
-	public void buyStock(LinkedList<Stock> stockList) throws Exception
+	public double buyStocks(ArrayList<Stock> stockList) 
 	{
-    		if (stockHistory.isEmpty())
+		double moneySpent = 0.0;
+		ArrayList<Double> percentages = new ArrayList<Double>();
+		percentages = calculateAveragePercentageDifference(stockList);
+		for(int i = 0; i<stockList.size(); i++)
 		{
-			for (int i = 0; i < stockList.size(); ++i)
+			int indexOfNextSmallestPercentage = percentages.indexOf(Collections.min(percentages));
+			Stock stockToBuy = stockList.get(indexOfNextSmallestPercentage);
+			if (balance >= purchaseLimit)
 			{
-				stockHistory.add(new LinkedList<double>());
-				//I saw this online
-				stockHistory.get(i).add(stockList[i].getPrice());
+				//this will truncate, but is desired so we go under the purchaseLimit instead of going over
+				int purchaseQuantity = (int) (purchaseLimit / stockToBuy.getPrice());
+				moneySpent += buyStock(stockToBuy, purchaseQuantity);
 			}
+			else if(balance < purchaseLimit)
+			{
+				int purchaseQuantity = (int) (balance / stockToBuy.getPrice());
+				moneySpent += buyStock(stockToBuy, purchaseQuantity);
+			}
+			percentages.remove(indexOfNextSmallestPercentage);
+			stockList.remove(stockToBuy);				
 		}
-		else {
-			//update history
-			for (int i = 0; i < stockList.size(); ++i)
-			{
-				stockHistory.get(i).add(stockList[i].getPrice());
-			}
-			//all queues are of the same size
-			if (!(stockHistory.get(0).size() < 6))
-			{
-				stockHistory.get(i).remove();
-				stockAverages = calculateAverages();
-				LinkedList stocksToBuy = getStocksToBuy(stockList);
-				if (!stocksToBuy.isEmpty())
-				{
-					//send request to buy from stock marketIPAdress
-					//right now assume just returning ints
-					//add to portfolio
-					for (int i = 0; i < stocksToBuy.size(); i++)
-					{
-						portfolio.add(stockList.get(i));
-						ownedStock.add(stockList.get(i).getName());
-						balance -= stockList.get(i).getPrice();
-					}
-					//write to log
-				}
-			}
+		return moneySpent;
+	}
+
+	public double sellStocks(ArrayList<Stock> stockList)
+	{
+		double moneyGained = 0.0;
+		for(Stock stock : stockList)
+		{
+			moneyGained += sellStock(stock, stock.getQuantity());//sell all
 		}
+		return moneyGained;
 	}
 	
-	public void sellStock(Stock stockToBuy) throws Exception
-    	{
-        	if (stockHistory.isEmpty())
+
+	@Override
+	protected void performTrading() {
+		this.buyPercentageThreshold = 0.95;
+		this.sellPercentageThreshold = 0.95;
+//		this.sellGainPercentageThreshold = 1.1;
+//		this.sellLossPercentageThreshold = 0.8;
+		this.purchaseLimit = 1000.0;
+		this.historySize = 10;
+		
+		if(stockHistory == null)
 		{
-			for (int i = 0; i < stockList.size(); ++i)
-			{
-				stockHistory.add(new LinkedList<double>());
-				//I saw this online
-				stockHistory.get(i).add(stockList[i].getPrice());
-			}
+			stockHistory = new ArrayList<ArrayList<Double>>();
 		}
-		else {
-			//all queues are of the same size
-			if (!(stockHistory.get(0).size() < 6))
+		if(stockAverages == null)
+		{
+			stockAverages = new ArrayList<Double>();
+		}
+		if(!marketStocks.isEmpty())
+		{
+			setStockHistory(marketStocks);
+			stockAverages = calculateAverages();
+			
+			ArrayList<Stock> stocksToSell = getStocksToSell(marketStocks);
+			double moneyGained = sellStocks(stocksToSell);
+			ArrayList<Stock> stocksToBuy = getStocksToBuy(marketStocks);
+			double moneySpent = buyStocks(stocksToBuy);
+			
+			System.out.println("Gained " + moneyGained + " from selling stock");
+			System.out.println("Spent" + moneySpent + " from buying stock");
+		}
+		
+	}
+
+	private void setStockHistory(ArrayList<Stock> stockList) 
+	{
+		ArrayList<Double> stockPricesToAdd = new ArrayList<Double>();
+		if(stockHistory.size()<=historySize)
+		{
+			for(Stock stock : stockList)
 			{
-				//dequeuing and calculating averages is done in buying
-				LinkedList stocksToSell = getStocksToSell(stockList);
-				if (!stocksToBuy.isEmpty())
-				{
-					//send request to buy from stock marketIPAdress
-					//right now assume just returning ints
-					//add to portfolio
-					for (int i = 0; i < stocksToBuy.size(); i++)
-					{
-						portfolio.remove(stockList.get(i));
-						ownedStock.remove(stockList.get(i).getName());
-						balance += stockList.get(i).getPrice();
-					}
-					//write to log
-				}
+				stockPricesToAdd.add(stock.getPrice());
 			}
+			stockHistory.add(stockPricesToAdd);
+		}
+		else
+		{
+			for(Stock stock : stockList)
+			{
+				stockPricesToAdd.add(stock.getPrice());
+			}
+			stockHistory.add(stockPricesToAdd);
+			stockHistory.remove(0);//remove the oldest entry
 		}
 	}
-    
 }
