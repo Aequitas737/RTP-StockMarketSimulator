@@ -26,23 +26,27 @@ import java.util.concurrent.LinkedBlockingQueue;
 import server.Stock;
 
 public abstract class Trader {
-	protected static int balance;
-	protected static ArrayList<Stock> portfolio;
-	protected static ArrayList<Stock> marketStocks;
+	protected double balance;
+	protected double startingBalance;
+	protected ArrayList<Stock> portfolio = new ArrayList<Stock>();
+	protected ArrayList<Stock> marketStocks;
+	protected ArrayList<Stock> initialStocks = new ArrayList<Stock>();
 
-	protected static LinkedList<String> ownedStock; //used for quick finding stocks bought by name
+
+	protected LinkedList<String> ownedStock; //used for quick finding stocks bought by name
 	
-	protected static InetAddress marketIPAdress;
-	protected static LinkedBlockingQueue<Object> messages;
 	protected static Socket socket;
 	
-	public abstract void buyStock(LinkedList<Stock> stockList);
+	public abstract ArrayList<Stock> getStocksToBuy(ArrayList<Stock> stockList);
 	
-	public abstract void sellStock(LinkedList<Stock> stockList);
+	public abstract ArrayList<Stock> getStocksToSell(ArrayList<Stock> stockList);
 	
-	protected abstract void analyzeMarketForDecision();
+	protected abstract void performTrading();
 
-	public Trader() throws UnknownHostException, IOException{
+	public Trader(double startingMoney) throws UnknownHostException, IOException{
+		this.startingBalance = startingMoney;
+		this.balance = this.startingBalance;
+		
 		System.out.println("Trader launched");
 		int portNumber = 4003;
 		String ipAddress = "127.0.0.1";
@@ -54,9 +58,9 @@ public abstract class Trader {
             fromServer = in.readLine();
             String initialStocksAndPricesList = fromServer;
             marketStocks = parseStocksAndPricesString(initialStocksAndPricesList);
-            
+            initialStocks = parseStocksAndPricesString(initialStocksAndPricesList); 
             while (true){
-            	analyzeMarketForDecision();
+            	performTrading();
             	displayInfo();
             	
             	fromServer = in.readLine();
@@ -67,8 +71,22 @@ public abstract class Trader {
 	
 	}
 
-	private void displayInfo() {
-		printCurrentLocalStockPrices();		
+	private void displayInfo() 
+	{
+//		printCurrentLocalStockPrices();		
+		System.out.println("Current balance: " + balance);
+		double portfolioValue = calculateTotalPortfolioValue();
+		System.out.println("Current portfolio value: " + portfolioValue);
+		double netWorth = balance + portfolioValue;
+		System.out.println("Net Worth: " + netWorth);
+		double profit = netWorth - startingBalance;
+		System.out.println("Net profit: " + profit);
+		
+		System.out.println("Portfolio details: ");
+		for(Stock stock : portfolio)
+		{
+			System.out.println("Own " + stock.getQuantity() + " shares of " + stock.getName());			
+		}
 	}
 
 	/*
@@ -119,6 +137,85 @@ public abstract class Trader {
 			stockList.add(stock);
 		}
 		return stockList;
+	}
+	
+	public double calculateTotalPortfolioValue()
+	{
+		double value = 0.0;
+		for(Stock stock : portfolio)
+		{
+			value+=stock.getPrice() * stock.getQuantity();
+		}
+		return value;
+	}
+	//TODO might only need this for calculating portfolio value so change stockList to be this.portfolio
+	protected double calculateTotalValue(ArrayList<Stock> stockList)
+	{
+		double result = 0.0;
+		for(Stock stock : stockList)
+		{
+			result += stock.getPrice() * stock.getQuantity();
+		}
+		return result;
+	}
+	
+	
+	public double buyStock(Stock stockToBuy, int quantityToBuy)
+    {
+		int stockIndex = portfolio.indexOf(stockToBuy);
+		int ownedQuantity = 0;
+		if(stockIndex>=0)
+		{
+			ownedQuantity = portfolio.get(stockIndex).getQuantity();
+		}
+		
+		portfolio.add(stockToBuy);
+		stockToBuy.setQuantity(ownedQuantity + quantityToBuy);
+//		ownedStock.add(stockToBuy.getName());
+		balance -= stockToBuy.getPrice() * quantityToBuy;
+		int index = indexOfStockFromName(initialStocks, stockToBuy.getName());
+		initialStocks.get(index).updatePrice(stockToBuy.getPrice());
+//		}
+//		else
+//		{
+//			portfolio.get(portfolio.indexOf(stockToBuy)).setQuantity(ownedQuantity-quantityToBuy);
+//			balance += stockToBuy.getPrice() * (quantityToBuy);
+//		}
+		return stockToBuy.getPrice() * quantityToBuy;
+    }
+ 
+	public int indexOfStockFromName(ArrayList<Stock> stockList, String stockName)
+	{
+		int i = 0;
+		for(Stock stock : stockList)
+		{
+			if(stock.getName().equals(stockName))
+			{
+				return i;
+			}
+			i++;
+		}
+		return -1;
+	}
+	
+	public double sellStock(Stock stockToSell, int quantityToSell)
+    {
+		int ownedQuantity = portfolio.get(portfolio.indexOf(stockToSell)).getQuantity();
+		if(ownedQuantity == quantityToSell)
+		{
+			portfolio.remove(stockToSell);
+//			ownedStock.remove(stockToSell.getName());
+			balance += stockToSell.getPrice() * stockToSell.getQuantity();
+			int index = indexOfStockFromName(initialStocks, stockToSell.getName());
+			initialStocks.get(index).updatePrice(stockToSell.getPrice());
+		}
+		else if(ownedQuantity > quantityToSell)
+		{
+			portfolio.get(portfolio.indexOf(stockToSell)).setQuantity(ownedQuantity-quantityToSell);
+			balance += stockToSell.getPrice() * (quantityToSell);
+		}
+		//return money made
+		return stockToSell.getPrice() * (quantityToSell);
 	}
 	
 	/**

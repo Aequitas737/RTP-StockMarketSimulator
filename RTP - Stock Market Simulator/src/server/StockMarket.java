@@ -26,9 +26,9 @@ public class StockMarket {
 	private ArrayList<Socket> clientSocketList = new ArrayList<Socket>();
     private  ServerSocket serverSocket;
         
-	private  double positiveBias = 0.51;//0-1, higher for more positive
+	private  double positiveBias = 0.45;//0-1, higher for more positive
 	private  double maxPercentageChange = 0.05;
-	private  long minimumTimeIntervalBetweenUpdates = ((long) 10000000000.);//nano seconds ie. 10 seconds
+	private  long minimumTimeIntervalBetweenUpdates = ((long) 5000000000.);//nano seconds ie. 5 seconds
 	
 	public StockMarket() throws IOException{
 		Stock stock1 = new Stock("aaa", 10.0);

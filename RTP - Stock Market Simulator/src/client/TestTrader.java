@@ -2,6 +2,7 @@ package client;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import server.Stock;
@@ -9,7 +10,7 @@ import server.Stock;
 public class TestTrader extends Trader {
 
 	public TestTrader() throws UnknownHostException, IOException {
-		super();
+		super(10000.0);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -17,21 +18,33 @@ public class TestTrader extends Trader {
 		TestTrader trader = new TestTrader();
 	}
 	
-	@Override
+
 	public void buyStock(LinkedList<Stock> stockList) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
+
 	public void sellStock(LinkedList<Stock> stockList) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	protected void analyzeMarketForDecision() {
+	protected void performTrading() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public ArrayList<Stock> getStocksToBuy(ArrayList<Stock> stockList) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<Stock> getStocksToSell(ArrayList<Stock> stockList) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

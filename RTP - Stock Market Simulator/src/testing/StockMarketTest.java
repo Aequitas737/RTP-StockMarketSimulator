@@ -8,7 +8,7 @@ import server.Stock;
 import server.StockMarket;
 
 public class StockMarketTest {
-
+/*
 	@Test
 	public void test() {
 		StockMarket market = new StockMarket();
@@ -45,5 +45,5 @@ public class StockMarketTest {
 		}
 		System.out.println("times positive = " +timesPositive);
 		System.out.println("times negative = " + timesNegative);
-	}
+	}*/
 }
