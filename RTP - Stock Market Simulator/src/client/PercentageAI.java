@@ -8,9 +8,9 @@ import server.Stock;
 
 public class PercentageAI extends Trader
 {
-	private double buyPercentageThreshold;
-	private double sellGainPercentageThreshold;
-	private double sellLossPercentageThreshold;
+	private double buyPercentageThreshold =0.9;
+	private double sellGainPercentageThreshold = 1.1;
+	private double sellLossPercentageThreshold =0.9;
 	private double purchaseLimit = 1000.0;//dollars
 	
 	public PercentageAI(double startingMoney) throws UnknownHostException, IOException {
