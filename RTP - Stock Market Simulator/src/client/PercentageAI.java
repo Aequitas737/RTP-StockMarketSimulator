@@ -50,24 +50,14 @@ public class PercentageAI extends Trader
 		//sort which stocks are eligible
 		for (int i = 0; i < stockList.size(); i++)
 		{
-//			System.out.println();
 			double currentPrice = stockList.get(i).getPrice();
 			double comparisonPrice = initialStocks.get(i).getPrice();
 			double thresholdedPrice = comparisonPrice * buyPercentageThreshold;
-//			System.out.println(buyPercentageThreshold);
-//			System.out.println(currentPrice);
-//			System.out.println(comparisonPrice);
-//			System.out.println(thresholdedPrice);
-//			System.out.println(currentPrice<thresholdedPrice);
 			if (currentPrice < thresholdedPrice)
 			{
-				System.out.println("something to buy!!");
-				System.out.println(stockList.get(i).getName());
-				System.out.println(stockList.get(i).getPrice());
 				stocksToBuy.add(stockList.get(i));
 			}
 		}
-//		System.out.println("----------------\n\n");
 		return stocksToBuy; //if empty don't buy
 	}
 	

@@ -26,12 +26,13 @@ public class StockMarket {
 	private ArrayList<Socket> clientSocketList = new ArrayList<Socket>();
     private  ServerSocket serverSocket;
         
-	private  double positiveBias = 0.51;//0-1, higher for more positive
+	private  double positiveBias = 0.49;//0-1, higher for more positive
 	private  double maxPercentageChange = 0.05;
 	private final long initialSetupDelay = ((long) 20000000000.); //20 seconds
+//	private final long initialSetupDelay = ((long) 20.); //nothing
 //	private  long minimumTimeIntervalBetweenUpdates = ((long) 5000000000.);//nano seconds ie. 5 seconds
-	private  long minimumTimeIntervalBetweenUpdates = ((long) 100000000.);//nano seconds ie. .1 seconds
-	private final int updateLimit = 1000;
+	private  long minimumTimeIntervalBetweenUpdates = ((long) 2000000.);//nano seconds ie. .001 seconds
+	private final int updateLimit = 10000;
 	
 	public StockMarket() throws IOException{
 		Stock stock1 = new Stock("aaa", 10.0);
@@ -52,7 +53,7 @@ public class StockMarket {
         		long lastUpdateTime = System.nanoTime();
         		long currentTime = System.nanoTime();
         		int iterations = 0;
-                while(iterations < updateLimit){
+                while(iterations <= updateLimit){
      			
         			currentTime = System.nanoTime();
         			if(currentTime - startTime > initialSetupDelay)
@@ -63,6 +64,7 @@ public class StockMarket {
 	        				updateMarket();
 	        				notifyClientsOfPriceChange();
 	        				printCurrentStockPrices();
+	        				System.out.println("iterations = "+ iterations);
 	        				iterations ++;
 	        			}
         			}
@@ -174,7 +176,7 @@ public class StockMarket {
 	public void updateMarket(){
 		for(Stock stock : stockList){
 			double currentPrice = stock.getPrice();
-			//Determine if the price should go up or down, biased slightly towards up
+			//Determine if the price should go up or down
 			boolean positiveMultiplier = Math.random()<positiveBias ? true : false;
 			//random positive number between 0 and 1 with distribution peaking at 0 and falling off towards 1
 			double randomMultiplier = Math.abs(Math.random()-Math.random())*maxPercentageChange;

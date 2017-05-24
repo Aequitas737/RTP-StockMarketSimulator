@@ -43,6 +43,8 @@ public class TrendingAI extends Trader
 			average /= stockHistory.size();
 			result.add(average);
 		}
+		calculateAveragesOldHalf();
+		calculateAveragesNewHalf();
 		return result;
 	}
 	
@@ -173,16 +175,27 @@ public class TrendingAI extends Trader
 		{
 			stockAverages = new ArrayList<Double>();
 		}
+		if(stockAveragesOldHalf == null)
+		{
+			stockAveragesOldHalf = new ArrayList<Double>();
+		}
+		if(stockAveragesNewHalf == null)
+		{
+			stockAveragesNewHalf = new ArrayList<Double>();
+		}
 		if(!marketStocks.isEmpty())
 		{
+			double moneyGained = 0.0;
+			double moneySpent = 0.0;
 			setStockHistory(marketStocks);
 			stockAverages = calculateAverages();
-			
-			ArrayList<Stock> stocksToSell = getStocksToSell(marketStocks);
-			double moneyGained = sellStocks(stocksToSell);
-			ArrayList<Stock> stocksToBuy = getStocksToBuy(marketStocks);
-			double moneySpent = buyStocks(stocksToBuy);
-			
+			if(stockHistory.size()>=10)
+			{
+				ArrayList<Stock> stocksToSell = getStocksToSell(marketStocks);
+				moneyGained = sellStocks(stocksToSell);
+				ArrayList<Stock> stocksToBuy = getStocksToBuy(marketStocks);
+				moneySpent = buyStocks(stocksToBuy);
+			}
 			System.out.println("\n\nGained " + moneyGained + " from selling stock");
 			System.out.println("Spent " + moneySpent + " from buying stock");
 		}
