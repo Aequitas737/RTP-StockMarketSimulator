@@ -216,6 +216,7 @@ public abstract class Trader {
 			balance += stockToSell.getPrice() * stockToSell.getQuantity();
 			int index = indexOfStockFromName(initialStocks, stockToSell.getName());
 			initialStocks.get(index).updatePrice(stockToSell.getPrice());
+			portfolio.remove(stockToSell);
 		}
 		else if(ownedQuantity > quantityToSell)
 		{
