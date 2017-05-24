@@ -140,7 +140,7 @@ public class PercentageAI extends Trader
 			ArrayList<Stock> stocksToBuy = getStocksToBuy(marketStocks);
 			double moneySpent = buyStocks(stocksToBuy);
 			
-			System.out.println("Gained " + moneyGained + " from selling stock");
+			System.out.println("\n\nGained " + moneyGained + " from selling stock");
 			System.out.println("Spent" + moneySpent + " from buying stock");
 		}
 	}
