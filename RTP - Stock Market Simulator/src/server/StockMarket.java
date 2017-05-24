@@ -28,13 +28,14 @@ public class StockMarket {
         
 	private  double positiveBias = 0.51;//0-1, higher for more positive
 	private  double maxPercentageChange = 0.05;
+	private final long initialSetupDelay = ((long) 20000000000.); //20 seconds
 //	private  long minimumTimeIntervalBetweenUpdates = ((long) 5000000000.);//nano seconds ie. 5 seconds
 	private  long minimumTimeIntervalBetweenUpdates = ((long) 100000000.);//nano seconds ie. .1 seconds
 	
 	public StockMarket() throws IOException{
 		Stock stock1 = new Stock("aaa", 10.0);
 		Stock stock2 = new Stock("bbb", 3.0);
-		Stock stock3 = new Stock("ccc", 0.001);
+		Stock stock3 = new Stock("ccc", 0.01);
 		addStock(stock1);
 		addStock(stock2);
 		addStock(stock3);
@@ -43,6 +44,7 @@ public class StockMarket {
 		
 		int portNumber = 4003;
 		serverSocket = new ServerSocket(portNumber);
+        long startTime = System.nanoTime();
         
         Thread updater = new Thread(){
         	public void run(){
@@ -51,12 +53,15 @@ public class StockMarket {
                 while(true){
      			
         			currentTime = System.nanoTime();
-        			if(currentTime - lastUpdateTime > minimumTimeIntervalBetweenUpdates){
-        				lastUpdateTime = currentTime;
-        				updateMarket();
-//        				System.out.println("updated market");
-        				notifyClientsOfPriceChange();
-        				printCurrentStockPrices();
+        			if(currentTime - startTime > initialSetupDelay)
+        			{
+	        			if(currentTime - lastUpdateTime > minimumTimeIntervalBetweenUpdates)
+	        			{
+	        				lastUpdateTime = currentTime;
+	        				updateMarket();
+	        				notifyClientsOfPriceChange();
+	        				printCurrentStockPrices();
+	        			}
         			}
                 }
         	}

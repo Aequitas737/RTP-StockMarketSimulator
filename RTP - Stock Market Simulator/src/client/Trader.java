@@ -179,8 +179,12 @@ public abstract class Trader {
 		{
 			ownedQuantity = portfolio.get(stockIndex).getQuantity();
 		}
+		else
+		{
+			//if the stock isn't already in the portfolio add it.
+			portfolio.add(stockToBuy);			
+		}
 		
-		portfolio.add(stockToBuy);
 		stockToBuy.setQuantity(ownedQuantity + quantityToBuy);
 //		ownedStock.add(stockToBuy.getName());
 		balance -= stockToBuy.getPrice() * quantityToBuy;

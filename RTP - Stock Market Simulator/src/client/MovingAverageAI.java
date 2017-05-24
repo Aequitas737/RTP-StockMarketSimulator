@@ -6,7 +6,7 @@ import java.util.*;
 
 import server.Stock;
 
-public class TrendingAI extends Trader
+public class MovingAverageAI extends Trader
 {
 	private double purchaseLimit;
 	private int historySize;
@@ -16,16 +16,16 @@ public class TrendingAI extends Trader
 	private double sellPercentageThreshold;
 	
 	
-	public TrendingAI(double startingMoney) throws UnknownHostException, IOException {
+	public MovingAverageAI(double startingMoney) throws UnknownHostException, IOException {
 		super(startingMoney);
 	}
 	
-	public TrendingAI() throws UnknownHostException, IOException {
+	public MovingAverageAI() throws UnknownHostException, IOException {
 		super(10000.0);
 	}
 	
 	public static void main(String[] args) throws UnknownHostException, IOException{
-		TrendingAI trader = new TrendingAI();
+		MovingAverageAI trader = new MovingAverageAI();
 	}
 
 	private ArrayList<Double> calculateAverages()
