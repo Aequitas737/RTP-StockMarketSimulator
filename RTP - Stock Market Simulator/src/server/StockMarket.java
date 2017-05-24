@@ -1,24 +1,11 @@
 package server;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import client.Trader;
 
 public class StockMarket {
 	private  ArrayList<Stock> stockList = new ArrayList<Stock>();
@@ -26,7 +13,7 @@ public class StockMarket {
 	private ArrayList<Socket> clientSocketList = new ArrayList<Socket>();
     private  ServerSocket serverSocket;
         
-	private  double positiveBias = 0.49;//0-1, higher for more positive
+	private  double positiveBias = 0.51;//0-1, higher for more positive
 	private  double maxPercentageChange = 0.05;
 	private final long initialSetupDelay = ((long) 20000000000.); //20 seconds
 //	private final long initialSetupDelay = ((long) 20.); //nothing
