@@ -31,15 +31,14 @@ public class TrendingAI extends Trader
 	private ArrayList<Double> calculateAverages()
 	{
 		ArrayList<Double> result = new ArrayList<Double>();
-		for (int i = 0; i < stockHistory.size(); i++)
+		for (int i = 0; i < stockHistory.get(0).size(); i++)//for each of the stocks in a moment of history
 		{
 			double average = 0.0;
-			ArrayList<Double> stockMomentInHistory = stockHistory.get(i).size();
-			for (int j = 0; j < stockMomentInHistory.csize; j++)
-			{//TODO add each average
-				average += stockHistory.get(i).get(j);
+			for(int j = 0; j<stockHistory.size(); j++)//for each of the moments of history
+			{
+				average += stockHistory.get(j).get(i);
 			}
-			average /= stockHistory.get(i).size();
+			average /= stockHistory.size();
 			result.add(average);
 		}
 		return result;
@@ -78,7 +77,10 @@ public class TrendingAI extends Trader
 		{
 			if (stockList.get(i).getPrice() > (stockAverages.get(i) * sellPercentageThreshold))
 			{
-				result.add(stockList.get(i));
+				if(portfolio.contains(stockList.get(i)))
+				{
+					result.add(stockList.get(i));
+				}	
 			}
 		}
 		return result; //if empty don't sell
@@ -148,8 +150,8 @@ public class TrendingAI extends Trader
 			ArrayList<Stock> stocksToBuy = getStocksToBuy(marketStocks);
 			double moneySpent = buyStocks(stocksToBuy);
 			
-			System.out.println("Gained " + moneyGained + " from selling stock");
-			System.out.println("Spent" + moneySpent + " from buying stock");
+			System.out.println("\n\nGained " + moneyGained + " from selling stock");
+			System.out.println("Spent " + moneySpent + " from buying stock");
 		}
 		
 	}
