@@ -215,6 +215,7 @@ public abstract class Trader {
 //			ownedStock.remove(stockToSell.getName());
 			balance += stockToSell.getPrice() * stockToSell.getQuantity();
 			int index = indexOfStockFromName(initialStocks, stockToSell.getName());
+			//TODO refactor initialStocks into PercentageAI, call super sellStock method
 			initialStocks.get(index).updatePrice(stockToSell.getPrice());
 			portfolio.remove(stockToSell);
 		}

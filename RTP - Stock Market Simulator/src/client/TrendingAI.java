@@ -75,6 +75,7 @@ public class TrendingAI extends Trader
 		ArrayList<Stock> result = new ArrayList<Stock>();
 		for (int i = 0; i < stockList.size(); i++)
 		{
+			//if the current stock price is greater than the average price for the stock by threshold percentage
 			if (stockList.get(i).getPrice() > (stockAverages.get(i) * sellPercentageThreshold))
 			{
 				if(portfolio.contains(stockList.get(i)))
@@ -126,7 +127,7 @@ public class TrendingAI extends Trader
 	@Override
 	protected void performTrading() {
 		this.buyPercentageThreshold = 0.95;
-		this.sellPercentageThreshold = 0.95;
+		this.sellPercentageThreshold = 1.05;
 //		this.sellGainPercentageThreshold = 1.1;
 //		this.sellLossPercentageThreshold = 0.8;
 		this.purchaseLimit = 1000.0;
