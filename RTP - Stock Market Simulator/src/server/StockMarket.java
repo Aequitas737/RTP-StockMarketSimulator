@@ -31,6 +31,7 @@ public class StockMarket {
 	private final long initialSetupDelay = ((long) 20000000000.); //20 seconds
 //	private  long minimumTimeIntervalBetweenUpdates = ((long) 5000000000.);//nano seconds ie. 5 seconds
 	private  long minimumTimeIntervalBetweenUpdates = ((long) 100000000.);//nano seconds ie. .1 seconds
+	private final int updateLimit = 1000;
 	
 	public StockMarket() throws IOException{
 		Stock stock1 = new Stock("aaa", 10.0);
@@ -50,7 +51,8 @@ public class StockMarket {
         	public void run(){
         		long lastUpdateTime = System.nanoTime();
         		long currentTime = System.nanoTime();
-                while(true){
+        		int iterations = 0;
+                while(iterations < updateLimit){
      			
         			currentTime = System.nanoTime();
         			if(currentTime - startTime > initialSetupDelay)
@@ -61,6 +63,7 @@ public class StockMarket {
 	        				updateMarket();
 	        				notifyClientsOfPriceChange();
 	        				printCurrentStockPrices();
+	        				iterations ++;
 	        			}
         			}
                 }

@@ -131,7 +131,7 @@ public class MovingAverageAI extends Trader
 //		this.sellGainPercentageThreshold = 1.1;
 //		this.sellLossPercentageThreshold = 0.8;
 		this.purchaseLimit = 1000.0;
-		this.historySize = 10;
+		this.historySize = 5;
 		
 		if(stockHistory == null)
 		{
