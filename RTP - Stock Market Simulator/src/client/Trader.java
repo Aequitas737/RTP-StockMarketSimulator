@@ -63,6 +63,7 @@ public abstract class Trader {
 	    logger.addHandler(fh);
 	    SimpleFormatter formatter = new SimpleFormatter();  
         fh.setFormatter(formatter);  
+        logger.setUseParentHandlers(false);
         logger.info("Trader Initiated"); 
 	    
         String fromServer;
